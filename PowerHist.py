@@ -18,7 +18,7 @@ import json
 import configparser
 import os
 
-DB_Name = "/home/pi/Store_MQTT_Data_in_Database/Power.db"
+DB_Name = "/home/pi/PowerHist/Power.db"
 cert = "server.crt"
 key = "server.key"
 
