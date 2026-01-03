@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-#  appDhtWebServer.py
+#  PowerHist.py
 #
 #  based on MJRoBot.org 10Jan18
 # enhancements and changes by
-# Michael Leopoldseder dec. 2019
+# Michael Leopoldseder Jan 2026
 
 import io
 import time
@@ -19,16 +19,16 @@ import configparser
 import os
 
 DB_Name = "/home/pi/PowerHist/Power.db"
-cert = "server.crt"
-key = "server.key"
+#cert = "server.crt"
+#key = "server.key"
 
 def read_config( filename ):
     global DB_Name, cert, key
     config = configparser.ConfigParser()
     config.read(filename)
     DB_Name = str(config['Database']['db'])
-    cert = str(config['certificates']['crt'])
-    key = str(config['certificates']['key'])
+    #cert = str(config['certificates']['crt'])
+    #key = str(config['certificates']['key'])
 
 def getHistDataSingle (sql_query):
     conn=sqlite3.connect(DB_Name)

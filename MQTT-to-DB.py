@@ -5,6 +5,7 @@
 #------------------------------------------
 
 
+import paho.mqtt.client as mqtt
 import json
 import sqlite3
 import time
@@ -21,6 +22,12 @@ newDay = False
 updateTodayData = False
 lastMonth = 0
 lastDay = 0
+
+# MQTT Settings 
+MQTT_Broker = "hap-nodejs"
+MQTT_Port = 1884
+Keep_Alive_Interval = 45
+TASMOTA_TOPIC = "tele/CTS_tasmota_SML_C18A90/SENSOR"
 
 # logging
 path = os.path.dirname(os.path.realpath(__file__))
@@ -53,14 +60,6 @@ def init():
 		logging.info( "Unexpected error:", sys.exc_info()[0] )
 	conn.close()
 	return lastMonth
-
-#===============================================================
-# Function to push Sensor Data into Database
-
-TASMOTA_TOPIC = "tele/tasmota_BE5B10/SENSOR"
-TASMOTA_TOPIC_ALT = "tasmota/discovery/E8DB84BE5B10/sensors"
-TASMOTA_TOPIC_NEW = "tele/CTS_tasmota_SML_C18A90/SENSOR"
-TASMOTA_TOPIC_NEW_ALT = "tasmota/discovery/28372FC18A90/sensors"
 
 def getFirstPowerDateFromDayBefore():
 	firstEntryTotal = 0.0
@@ -322,13 +321,39 @@ def Power_Data_Handler(topic, jsonData):
 		logging.info("day: %d set lastMonth: %d to actual month: %d", day, lastMonth, month)
 		lastMonth = month
 
-#===============================================================
-# Master Function to Select DB Funtion based on MQTT Topic
+#Subscribe to all Sensors at Base Topic
+def on_connect(mosq, obj, flags, rc):
+	logging.info( "on_connect" )
+	mqttc.subscribe(TASMOTA_TOPIC, 0)
 
-def power_Data_Handler(Topic, jsonData):
-	logging.info( "power_Data_Handler" )
-	Power_Data_Handler(Topic, jsonData)
+#Save Data into DB Table
+def on_message(mosq, obj, msg):
+	# This is the Master Call for saving MQTT Data into DB
+	# For details of "sensor_Data_Handler" function please refer "sensor_data_to_db.py"
+	logging.info( "-------" )
+	logging.info( "MQTT Data Received..." )
+	logging.info( "MQTT Topic: " + msg.topic )
+	#print( "Data: " + msg.payload )
+	if( msg.topic == TASMOTA_TOPIC or msg.topic == TASMOTA_TOPIC_ALT or msg.topic == TASMOTA_TOPIC_NEW ):
+		Power_Data_Handler(msg.topic, msg.payload)
 
-#===============================================================
+def on_subscribe(mqttc, obj, mid, reason_code_list):
+	print("Subscribed: " + str(mid) + " " + str(reason_code_list))
 
 lastMonth = init()
+
+logging.info( "start creating mqtt client" )
+mqttc = mqtt.Client()
+
+# Assign event callbacks
+mqttc.on_message = on_message
+mqttc.on_connect = on_connect
+mqttc.on_subscribe = on_subscribe
+
+# Connect
+logging.info( "connect to broker" )
+mqttc.connect(MQTT_Broker, MQTT_Port) #, int(Keep_Alive_Interval))
+
+# Continue the network loop
+logging.info( "loop forever" )
+mqttc.loop_forever()
