@@ -14,6 +14,7 @@ import sys
 import logging
 import logging.config
 import logging.handlers
+import configparser
 import os
 
 # SQLite DB Name
@@ -26,7 +27,7 @@ lastDay = 0
 # MQTT Settings 
 MQTT_Broker = "hap-nodejs"
 MQTT_Port = 1884
-Keep_Alive_Interval = 45
+Keep_Alive_Interval = 60
 TASMOTA_TOPIC = "tele/CTS_tasmota_SML_C18A90/SENSOR"
 
 # logging
@@ -340,7 +341,19 @@ def on_message(mosq, obj, msg):
 def on_subscribe(mqttc, obj, mid, reason_code_list):
 	print("Subscribed: " + str(mid) + " " + str(reason_code_list))
 
+def read_config( filename ):
+    global DB_Name, MQTT_Broker, MQTT_Port, Keep_Alive_Interval, TASMOTA_TOPIC
+    config = configparser.ConfigParser()
+    config.read(filename)
+    DB_Name = str(config['Database']['db'])
+	MQTT_Broker = str(config['MQTT']['host'])
+	MQTT_Port = str(config['MQTT']['port'])
+	Keep_Alive_Interval = str(config['MQTT']['keepAlive'])
+	TASMOTA_TOPIC = str(config['MQTT']['topic'])
+
 lastMonth = init()
+
+read_config()
 
 logging.info( "start creating mqtt client" )
 mqttc = mqtt.Client()
