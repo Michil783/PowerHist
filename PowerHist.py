@@ -17,16 +17,21 @@ import sqlite3
 import json
 import configparser
 import os
+import sys
+import argparse
 
 DB_Name = "/home/pi/PowerHist/Power.db"
 #cert = "server.crt"
 #key = "server.key"
+port = 8090
+configFile = "PowerHist.conf"
 
 def read_config( filename ):
-    global DB_Name, cert, key
+    global DB_Name, cert, key, port
     config = configparser.ConfigParser()
     config.read(filename)
     DB_Name = str(config['Database']['db'])
+    port = int(config['host']['port'])
     #cert = str(config['certificates']['crt'])
     #key = str(config['certificates']['key'])
 
@@ -52,6 +57,7 @@ def deleteInvalidData (source):
 def powerQuery():
     conn=sqlite3.connect(DB_Name)
     curs=conn.cursor()
+    Date_n_Time = ""
     for row in curs.execute("SELECT Date_n_Time, Total, Power, Voltage, Voltage_L2, Voltage_L3, Current, Current_L2, Current_L3, Freq FROM Power_Data ORDER BY Date_n_Time DESC LIMIT 1"):
         print( row )
         Date_n_Time = row[0]
@@ -65,18 +71,20 @@ def powerQuery():
         Current_L3 = float(row[8])
         Freq = float(row[9])
     conn.close()
-    templateData = {
-        'time': Date_n_Time,
-        'Total': Total,
-        'Power': Power,
-        'Voltage': Voltage,
-        'Voltage_L2': Voltage_L2,
-        'Voltage_L3': Voltage_L3,
-        'Current': Current,
-        'Current_L2': Current_L2,
-        'Current_L3': Current_L3,
-        'Freq': Freq
-    }
+    templateData = {}
+    if Date_n_Time != "":
+        templateData = {
+            'time': Date_n_Time,
+            'Total': Total,
+            'Power': Power,
+            'Voltage': Voltage,
+            'Voltage_L2': Voltage_L2,
+            'Voltage_L3': Voltage_L3,
+            'Current': Current,
+            'Current_L2': Current_L2,
+            'Current_L3': Current_L3,
+            'Freq': Freq
+        }
     response = app.response_class(
         response=json.dumps(templateData),
         status=200,
@@ -217,9 +225,16 @@ def powerHistoryQuery():
     return response
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser("PowerHist")
+    parser.add_argument("-c", help="config file name") 
+    args = parser.parse_args()
+    argsdict = vars(args)
+    print( args )
+    print( argsdict )
+    if argsdict["c"]:
+        configFile = argsdict["c"]
     myPath = os.path.dirname(os.path.realpath(__file__))
-    read_config( myPath+'/PowerHist.conf' )
-    print("crt=", cert)
-    print("key=", key)
+    print("configFile: " + configFile)
+    read_config( myPath+"/"+configFile )
     print("db", DB_Name)
-    app.run(host='0.0.0.0', port=8090, debug=True, extra_files=[])
+    app.run(host='0.0.0.0', port=port, debug=True, extra_files=[])

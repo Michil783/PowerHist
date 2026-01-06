@@ -18,7 +18,7 @@ import configparser
 import os
 
 # SQLite DB Name
-DB_Name =  "/home/pi/MQTT-to-DB/Power.db"
+DB_Name =  ""
 newDay = False
 updateTodayData = False
 lastMonth = 0
@@ -29,10 +29,11 @@ MQTT_Broker = "hap-nodejs"
 MQTT_Port = 1884
 Keep_Alive_Interval = 60
 TASMOTA_TOPIC = "tele/CTS_tasmota_SML_C18A90/SENSOR"
+MQTT_User = "raspi"
+MQTT_Passwd = "trinitron"
 
 # logging
 path = os.path.dirname(os.path.realpath(__file__))
-#logging.basicConfig(filename='mqtt_listen_sensor_data.log', encoding='utf-8', level=logging.INFO)
 logging.config.fileConfig(path+"/MQTT-to-DB.conf")
 
 def init():
@@ -66,7 +67,7 @@ def getFirstPowerDateFromDayBefore():
 	firstEntryTotal = 0.0
 	logging.info( "getFirstPowerDataFromDayBefore()" )
 	try:
-		conn=sqlite3.connect('/home/pi/Store_MQTT_Data_in_Database/'+ DB_Name)
+		conn=sqlite3.connect(DB_Name)
 		logging.info( "connection" )
 		curs = conn.cursor()
 		logging.info( "cursor" )
@@ -93,7 +94,7 @@ def getLastPowerDataFromDayBefore():
 	lastEntryDate = ""
 	logging.info("getLastDataFromDayBefore()")
 	try:
-		conn=sqlite3.connect('/home/pi/Store_MQTT_Data_in_Database/'+ DB_Name)
+		conn=sqlite3.connect(DB_Name)
 		logging.info( "connection" )
 		curs = conn.cursor()
 		logging.info( "cursor" )
@@ -120,7 +121,7 @@ def getLastMonthTotal():
 	lastMonthTotal = 0.0
 	logging.info("getLastMonthTotal()")
 	try:
-		conn=sqlite3.connect('/home/pi/Store_MQTT_Data_in_Database/'+ DB_Name)
+		conn=sqlite3.connect(DB_Name)
 		logging.info( "connection" )
 		curs = conn.cursor()
 		logging.info( "cursor" )
@@ -145,7 +146,7 @@ def getLastMonthTotal():
 def insertNewDayData(newDayDate, newDayTotal, newDayUsed):
 	logging.info("insertNewDayData(%s,%6.0f,%3.0f)", newDayDate, newDayTotal, newDayUsed)
 	try:
-		conn=sqlite3.connect('/home/pi/Store_MQTT_Data_in_Database/'+ DB_Name)
+		conn=sqlite3.connect(DB_Name)
 		logging.info( "connection" )
 		curs = conn.cursor()
 		logging.info( "cursor" )
@@ -162,7 +163,7 @@ def insertNewDayData(newDayDate, newDayTotal, newDayUsed):
 def insertNewMonthData(newMonthDate, newMonthTotal, newMonthUsed):
 	logging.info("insertNewMonthData(%s,%6.0f,%3.0f)", newMonthDate, newMonthTotal, newMonthUsed)
 	try:
-		conn=sqlite3.connect('/home/pi/Store_MQTT_Data_in_Database/'+ DB_Name)
+		conn=sqlite3.connect(DB_Name)
 		logging.info( "connection" )
 		curs = conn.cursor()
 		logging.info( "cursor" )
@@ -180,7 +181,7 @@ def insertNewData(Date_n_Time, Total, Power, Voltage, Voltage_L2, Voltage_L3, Cu
 	logging.info("insertNewData(%s, %f, %d, %d, %d, %d, %f, %f, %f, %f)", Date_n_Time, Total, Power, Voltage, Voltage_L2, Voltage_L3, Current, Current_L2, Current_L3, Freq)
 	try:
 		logging.info( "Start inserting into DB" )
-		conn=sqlite3.connect('/home/pi/Store_MQTT_Data_in_Database/'+ DB_Name)
+		conn=sqlite3.connect(DB_Name)
 		logging.info( "connection" )
 		curs = conn.cursor()
 		logging.info( "cursor" )
@@ -202,7 +203,7 @@ def insertNewData(Date_n_Time, Total, Power, Voltage, Voltage_L2, Voltage_L3, Cu
 def deleteDataFrom2DaysBefore():
 	logging.info("deleteDataFrom2DaysBefore()")
 	try:
-		conn=sqlite3.connect('/home/pi/Store_MQTT_Data_in_Database/'+ DB_Name)
+		conn=sqlite3.connect(DB_Name)
 		logging.info( "connection" )
 		curs = conn.cursor()
 		logging.info( "cursor" )
@@ -324,8 +325,9 @@ def Power_Data_Handler(topic, jsonData):
 
 #Subscribe to all Sensors at Base Topic
 def on_connect(mosq, obj, flags, rc):
+	global mqttc
 	logging.info( "on_connect" )
-	mqttc.subscribe(TASMOTA_TOPIC, 0)
+	mqttc.subscribe(TASMOTA_TOPIC, 0, )
 
 #Save Data into DB Table
 def on_message(mosq, obj, msg):
@@ -342,30 +344,35 @@ def on_subscribe(mqttc, obj, mid, reason_code_list):
 	print("Subscribed: " + str(mid) + " " + str(reason_code_list))
 
 def read_config( filename ):
-    global DB_Name, MQTT_Broker, MQTT_Port, Keep_Alive_Interval, TASMOTA_TOPIC
-    config = configparser.ConfigParser()
-    config.read(filename)
-    DB_Name = str(config['Database']['db'])
+	global DB_Name, MQTT_Broker, MQTT_Port, Keep_Alive_Interval, TASMOTA_TOPIC, MQTT_User, MQTT_Passwd
+	config = configparser.ConfigParser()
+	config.read(filename)
+	DB_Name = str(config['Database']['db'])
 	MQTT_Broker = str(config['MQTT']['host'])
-	MQTT_Port = str(config['MQTT']['port'])
-	Keep_Alive_Interval = str(config['MQTT']['keepAlive'])
+	MQTT_Port = int(config['MQTT']['port'])
+	Keep_Alive_Interval = int(config['MQTT']['keepAlive'])
 	TASMOTA_TOPIC = str(config['MQTT']['topic'])
+	MQTT_User = str(config['MQTT']['user'])
+	MQTT_Passwd = str(config['MQTT']['passwd'])
+
+read_config("MQTT.conf")
 
 lastMonth = init()
 
-read_config()
-
 logging.info( "start creating mqtt client" )
+logging.info("user: "+MQTT_User)
+logging.info("passwd: "+MQTT_Passwd)
 mqttc = mqtt.Client()
 
 # Assign event callbacks
 mqttc.on_message = on_message
 mqttc.on_connect = on_connect
 mqttc.on_subscribe = on_subscribe
+mqttc.username_pw_set(MQTT_User, MQTT_Passwd)
 
 # Connect
 logging.info( "connect to broker" )
-mqttc.connect(MQTT_Broker, MQTT_Port) #, int(Keep_Alive_Interval))
+mqttc.connect(MQTT_Broker, MQTT_Port, int(Keep_Alive_Interval))
 
 # Continue the network loop
 logging.info( "loop forever" )
