@@ -92,7 +92,7 @@ def powerQuery():
     )
     return response
 
-@app.route("/power1d", methods=['GET'])
+""" @app.route("/power1d", methods=['GET'])
 def powerQuery1d():
     parameter = request.args.get('para')
     data = []
@@ -131,7 +131,7 @@ def powerQuery1d():
         mimetype='application/json'
     )
     return response
-
+ """
 @app.route("/powerflex", methods=['GET'])
 def powerQueryflex():
     select = request.args.get('select')
@@ -172,6 +172,7 @@ def powerQueryflex():
     )
     return response
 
+""""
 @app.route("/powermonthflex", methods=['GET'])
 def powerQueryMonthFlex():
     select = request.args.get('select')
@@ -197,6 +198,7 @@ def powerQueryMonthFlex():
         mimetype='application/json'
     )
     return response
+"""
 
 @app.route("/powerhistory", methods=['GET'])
 def powerHistoryQuery():

@@ -1,0 +1,125 @@
+body{
+  background: black;
+  color: white;
+	padding:0%;
+  /*overflow: hidden;*/
+  font-family: 'Lucida Sans', 'Lucida Sans Regular', 'Lucida Grande', 'Lucida Sans Unicode', Geneva, Verdana, sans-serif;
+}
+
+table#Date {
+  width: 100%;
+	text-align: center;
+}
+
+div#datetime {
+	text-align: center;
+	font-size: 4.5em; /*10vh;*/
+}
+
+div#datetimemobile {
+	text-align: center;
+	font-size: 2.5em; /*10vh;*/
+}
+
+table#Data {
+	width: 100%;
+	table-layout: fixed;
+	border: 4px solid #f1eaea;
+	border-bottom-width: 2px;
+	padding: 0 0 0 0;
+  vertical-align: top;
+}
+
+table#Data th, td {
+  /*padding: 5px;*/
+  text-align: left;
+  /* border: 1px solid white; */
+}
+
+table#Data td {
+  vertical-align: top;
+}
+
+table#TotalData {
+  width: 100%;
+	text-align: left;
+  /*border: 1px solid white;*/
+  font-size: 1.25em;
+  vertical-align: top;
+  text-align: left;
+  border: 1px white;
+}
+
+table#TotalData td:nth-child(1) {
+  width: 25%;
+  vertical-align: bottom;
+}
+
+table#TotalData td:nth-child(2) {
+  width: 20%;
+  vertical-align: bottom;
+  text-align: right;
+}
+
+table#TotalData td:nth-child(3) {
+  width: 10%;
+  vertical-align: bottom;
+  text-align: left;
+}
+
+div#TotalValue {
+	font-size: 2.5em;
+	color: #2bff00;
+  letter-spacing: -0.05em;
+  /*padding: 10px;*/
+  display: inline-block;
+  text-align: right;
+}
+
+div#TotalValueBefore {
+	font-size: 1.5em;
+	color: #2bff00;
+  letter-spacing: -0.05em;
+  /*padding: 10px;*/
+  display: inline-block;
+  text-align: right;
+}
+
+div#TotalDate {
+  font-size: 0.75em;
+	text-align: left;
+}
+
+img#PowerThisWeek {
+  width: 98%;
+}
+
+table#PowerData {
+	height: 100%;
+	max-height: 100%;
+	min-height: 100%;
+	width: 100%;
+  font-size: 1.5em;
+  /* border: 1px solid white; */
+}
+
+table#PowerData td {
+  vertical-align: top;
+  text-align: left;
+}
+
+div#PowerValue {
+	font-size: 2.5em; /*4vh;*/
+  display: inline-block;
+}
+
+div#PowerDate {
+  /*padding-right: 1vw;*/
+  font-size: 0.75em;
+	text-align: right;
+}
+
+img#PowerHistory {
+  width: 95%;
+}
+

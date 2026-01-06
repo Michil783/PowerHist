@@ -1,0 +1,130 @@
+body{
+	background: rgb(212, 205, 205);
+	color: rgb(5, 5, 5);
+	padding:1%
+}
+
+div#Date {
+	width: 100%;
+	text-align: center;
+	font-size: 3.75em; /*60px;*/
+	/* border: 4px solid #000000; */
+}
+
+table#Data {
+	width: 100%;
+	table-layout: fixed;
+	border: 4px solid #000000;
+	border-bottom-width: 2px;
+	padding: 0 0 0 0;
+
+}
+
+table#Data tr td:first-child {
+	width: 35%;
+}
+
+table#Data tr td:last-child {
+	width: 35%;
+}
+
+table#OutsideTemp th {
+	text-align: center;
+}
+
+table#OutsideTemp tr td {
+	text-align: center;
+	font-size: 3.75em; /*60px;*/
+	letter-spacing: -0.1em;
+}
+
+table#InsideTemp th {
+	text-align: center;
+}
+
+table#InsideTemp tr td {
+	text-align: center;
+	font-size: 3.75em; /*60px;*/
+	letter-spacing: -0.1em;
+}
+
+table#CommonData {
+	border-left: 4px solid #000000;
+	border-right: 4px solid #000000;
+	padding: 0 0 0 0;
+	height: 100%;
+	max-height: 100%;
+	min-height: 100%;
+	width: 100%;
+	font-size: 2.25em; /*36px;*/
+}
+
+table#CommonData tr td:first-child {
+	/*width: 40%;*/
+	text-align: left;
+}
+
+table#CommonData tr td:last-child{
+	/*width: 40%;*/
+	text-align: right;
+}
+table#ForecastTable {
+	border: 4px solid #000000;
+	border-top-width: 2px;
+	padding: 0 0 0 0;
+	width: 100%;
+}
+
+table#ForecastTable tr td {
+	text-align: center;
+}
+
+table#ForecastTable tr#TodayIcons {
+	width: 100%;
+}
+
+table#ForecastTable tr#TodayIcons td {
+	align-content: center;
+}
+
+table#ForecastTable tr#TodayIcons img {
+	align-content: center;
+	width: 70%;
+}
+
+table#ForecastTable tr#TodayData {
+	text-align: center;
+	border-bottom: 2px solid #000000;
+}
+
+table#ForecastTable tr#ForecastIcons {
+	width: 100%;
+}
+
+table#ForecastTable tr#ForecastIcons td {
+	align-content: center;
+}
+
+table#ForecastTable tr#ForecastIcons img {
+	align-content: center;
+	width: 70%;
+}
+
+table#ForecastTable tr#ForecastData {
+	text-align: center;
+	border-bottom: 2px solid #000000;
+}
+
+img#OutsideHistory {
+	width: 100%;
+	height: 30%;
+	min-height: 30%;
+	max-height: 30%;
+}
+
+img#InsideHistory {
+	width: 100%;
+	height: 30%;
+	min-height: 30%;
+	max-height: 30%;
+}

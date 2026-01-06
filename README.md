@@ -27,6 +27,6 @@ In addition there are 3 parts which are in this repository.
 
 - PowerStation
   This is an web application (or web pages) to display the power data received from Tasmota device and stored in the database. It will use the PowerHist.py part to access the database. This part could also be deployed on an other Raspberry Pi due to access to SQLite database via the PowerHist.py (no direct access to DB)
-  More details could be found here: [PowerStation](PowerStation.md)
+  More details could be found here: [PowerStation](PowerStation/README.md)
 
 Currently I'm also working on an iOS application to display the data directly on an Apple device. This app is also using the interface to the Database provided by PowerHist.py adn the MQTT broker.

@@ -1,0 +1,146 @@
+
+<!DOCTYPE html>
+    <head>
+        <title>Stromzähler</title>
+        <!--<link rel="stylesheet" type="text/css" href={{ url_for('static', filename='style.css') }}/>-->
+        <link rel="stylesheet" type="text/css" href="{{ url_for('static',filename='blackstyle.css') }}?v1.0"/>
+        <link rel="shortcut icon" href="{{ url_for('static', filename='favicon.ico') }}">
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $("#Total").load("/Total");
+                $("#Current").load("/Current");
+                $("#Power").load("/Power");
+                $("#PowerThisWeek").load("/PowerThisWeek");
+                $("#PowerThisMonth").load("/PowerThisMonth");
+            })
+
+        </script>
+    </head>
+    <body>
+        <!--<div id="Date">-->
+        <table id="Date"><!-- style="width:100%">-->
+            <tr>
+                <!--<td style="width:10%"></td>-->
+                <td style="width:100%"><div id="datetime"><span id="datetime1"></span><span id="datetime_separator">:</span><span id="datetime2"></span></div></td>
+                <!--<td style="width:10%; font-size:2em; text-align:right; vertical-align:top;"><a href="/settings" title="Settings" </a>&#x2699</a>--></td>
+            </tr>
+        </table>
+        <!--</div>-->
+        <table id="Data">
+            <tr>
+                <td style="width:30%">
+                    <div id="Total"></div>
+                </td>
+                <td style="width:20%">
+                    <div id="Current"></div>
+                </td>
+                <td style="width:50%">
+                    <div id="Power"></div>
+                </td>
+            </tr>
+            <tr>
+                <td style="width:40%">
+                    <div id="PowerThisWeek"></div>
+                </td>
+                <td style="width:60%">
+                    <div id="PowerThisMonth"></div>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <div id="Date">{{ date_n_time }}</div> 
+                </td>
+            </tr>
+        </table>
+        &copy; 2025 by Michael Leopoldseder
+    </body>
+    <script type="text/javascript">
+        var timer = 0;
+        var clientVars = new Array();
+        clientVars["width"]=$(window).width();
+        clientVars["height"]=$(window).height();
+        console.log(clientVars["width"]);
+        console.log(clientVars["height"]);
+
+        updateDate();
+        setInterval("updateDate();", 1000);
+
+        function getCookie() {
+            var cname = "cookie-msg-test=";
+            var ca = document.cookie.split(';');
+            for (var i=0; i < ca.length; i++) {
+                var c = ca[i];
+                while (c.charAt(0)==' ') c = c.substring(1,c.length);
+                if (c.indexOf(cname) == 0) {
+                    return c.substring(cname.length, c.length);
+                }
+            }
+            return null;
+        }
+
+        function updateDate() {
+            //console.log( "updateDate()" );
+            const dt = new Date(Date.now());
+            var weekday = new Array(7);
+            weekday[0] = "Sonntag";
+            weekday[1] = "Montag";
+            weekday[2] = "Dienstag";
+            weekday[3] = "Mittwoch";
+            weekday[4] = "Donnerstag";
+            weekday[5] = "Freitag";
+            weekday[6] = "Samstag";
+            var month = new Array(12);
+            month[0] = "Januar";
+            month[1] = "Februar";
+            month[2] = "März";
+            month[3] = "April";
+            month[4] = "Mai";
+            month[5] = "Juni";
+            month[6] = "Juli";
+            month[7] = "August";
+            month[8] = "September";
+            month[9] = "Oktober";
+            month[10] = "November";
+            month[11] = "Dezember";
+            var n = weekday[dt.getDay()];
+            var m = month[dt.getMonth()];
+            document.getElementById("datetime1").innerHTML = n+", "+dt.getDate()+". "+m+" "+('0'+dt.getHours()).slice(-2);
+            document.getElementById("datetime2").innerHTML = ('0'+dt.getMinutes()).slice(-2);
+            if( dt.getSeconds() % 2 != 0 ) {
+                document.getElementById("datetime_separator").style.color = "white";
+            } else {
+                document.getElementById("datetime_separator").style.color = "black";
+            }
+            timer = timer + 1;
+            //console.log( "timer: ", timer );
+            if ( timer % 10 == 0 ) {
+                console.log("reload current display");
+                //var url_part_from_cookie = getCookie();
+                //console.log( url_part_from_cookie );                
+                //$("#Total").load("/Total");
+                //$("#Power").load("/Power");
+                $("#Current").load("/Current");
+            }
+            if ( timer % 60 == 0 ) {
+                console.log("reload power display");
+                //var url_part_from_cookie = getCookie();
+                //console.log( url_part_from_cookie );                
+                $("#Total").load("/Total");
+                $("#Power").load("/Power");
+                $("#Current").load("/Current");
+            }
+            if( timer % 15*60 == 0 ) {
+                timer = 0
+                console.log("reload total display");
+                $("#Total").load("/Total");
+                $("#Power").load("/Power");
+                $("#Current").load("/Current");
+                $("#PowerThisWeek").load("/PowerThisWeek");
+                $("#PowerThisMonth").load("/PowerThisMonth");
+            }
+        }
+
+    </script>
+</html>

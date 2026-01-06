@@ -1,0 +1,36 @@
+                    <table width="100%">
+                        <!--<th>Innen</th>-->
+                        <tr>
+                            <!--
+                            <td id="InsideLocation">{{ insideLocation }}</td>
+                            -->
+                            <td id="InsideTemp" style="color: {{insidecolor}}">{{ insidetemp }}&#x2103</td>
+                        </tr>
+                    </table>
+                    <table width="100%">
+                        <tr>
+                            <td id="InsideVoltage" width="34%" vertical-align="center">
+                                <span style="color: {{insidevoltage}}">{{ insidevolt }}V {{insidecharging}}</span>
+                                <br>
+                                <span style="color: {{nextinsidevoltage}}">{{nextinsidevolt}}V {{nextinsidecharging}}</span>
+                                <span style="color: white"> / {{nextinsidetemp}}&#x2103</span>
+                            </td>
+                            <td width=32% id="InsideLocationName">
+                                {{ insideLocationName }}
+                            </td>
+                            <td id="InsideDate" width="34%" vertical-align="center">
+                                <span style="color: {{insidedateage}}">{{ insidetime }}</span>
+                                <br>
+                                <span style="color: {{nextinsidedateage}}">{{ nextinsidetime }}</span>
+                            </td>
+                        </tr>
+                    </table>
+                    <!--
+                    <table width="100%">
+                        <tr width="100%">
+                            <td width="100%">
+                                <img id="InsideHistory" src="/plot/inside" alt="inside Temp history">
+                            </td>
+                        </tr>
+                    </table>
+                -->
