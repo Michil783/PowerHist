@@ -1,5 +1,5 @@
 #------------------------------------------
-#--- Author: Michaelk Leopoldseder
+#--- Author: Michael Leopoldseder
 #--- Date: 02.01.2026
 #--- Version: 1.0
 #------------------------------------------
