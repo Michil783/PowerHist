@@ -6,8 +6,8 @@ https://tasmota.github.io/docs/Smart-Meter-Interface/#efr-sgm-c2c4d4-sml
 
 The configuration of the Tasmota device is very important due to the fact that the complete tool chain is depending on the data transmitted to MQTT broker. PLease have a look into the necessary data received from Tasmota device here: [Tasmota config](Tasmota.md)
 
-This system is based on an Raspberry Pi hosting an MQTT broker (mosquitto broker) to receive the data from the device. How to setup the broker could be found on several places in the internet. For storing the data a sqlite3 database is used (how to install sqlite3 on Raspberry Pi could be found in the internet). If you want to use any other DB you probably have to adapt the code. I used plain SQL statements but probably they are sqlite3 specific.
-For automatic starting and controlling the web pages and the MQTT client for storing data into DB I used pm2 (details could be found in the internet e.g. here: https://pm2.keymetrics.io).
+This system is based on an Raspberry Pi hosting an MQTT broker (mosquitto broker) to receive the data from the device. How to setup the broker could be found on several places in the internet (e.g. https://github.com/eclipse-mosquitto/mosquitto). For storing the data a sqlite3 database is used (how to install sqlite3 on Raspberry Pi could be found in the internet, e.g. https://sqlite.org). If you want to use any other DB you probably have to adapt the code. I used plain SQL statements but probably they are sqlite3 specific.
+For automatic starting and controlling the web pages and the MQTT client for storing data into DB I used pm2 (details could be found in the internet e.g. here: https://github.com/Unitech/pm2).
 
 So, the base system depends on four blocks
 
