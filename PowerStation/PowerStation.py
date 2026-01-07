@@ -41,9 +41,19 @@ path = os.path.dirname(os.path.realpath(__file__))
 #logging.basicConfig(filename='mqtt_listen_sensor_data.log', encoding='utf-8', level=logging.INFO)
 logging.config.fileConfig("PowerStation.conf")
 
+ownPort = 8091
+dbInterfaceHost = "hap-nodejs"
+dbInterfacePort = 8090
+cert = ""
+key = ""
+
 def read_config_data( filename ):
+	global ownPort, cert, key, dbInterfaceHost, dbInterfacePort
 	config = configparser.ConfigParser()
 	config.read(filename)
+	dbInterfaceHost = str(config['DBInterface']['host'])
+	dbInterfacePort = int(config['DBInterface']['port'])
+	ownPort = int(config['host']['port'])
 
 # define and initialize global variables
 time_of_update = 0
@@ -75,7 +85,7 @@ def index():
                    "Tablet" if user_agent_parsed.is_tablet else
                    "Desktop")
 	logging.info( f"Device Type: {device_type}, Browser: {user_agent_parsed.browser.family}" )
-	data = requests.get("http://hap-nodejs:8090/power").json()
+	data = requests.get("http://"+dbInterfaceHost+":"+str(dbInterfacePort)+"/power").json()
 	logging.info( "DB request result: " )
 	logging.info( json.dumps(data, indent=2) )
 	default_loc = locale.getlocale()
@@ -88,10 +98,10 @@ def index():
 	currentMonth = datetime.now().month
 	logging.info( "currentMonth: %d", currentMonth )
 	logging.info("currentMonth: %d %s", currentMonth, str(currentMonth-1).zfill(2))
-	#select = "http://hap-nodejs:8090/powerhistory?select=select * from Power_Data_Month where strftime('%m', Date) == strftime('%m', Date('now','-1 month')) order by Date desc limit 1;"
-	select = "http://hap-nodejs:8090/powermonthflex?select=select * from Power_Data_Month where strftime('%m',Date) == '"+str(currentMonth-1).zfill(2)+"' order by date desc limit 1"
+	#select = "http://"+dbInterfaceHost+":"+str(dbInterfacePort)+"/powerhistory?select=select * from Power_Data_Month where strftime('%m', Date) == strftime('%m', Date('now','-1 month')) order by Date desc limit 1;"
+	select = "http://"+dbInterfaceHost+":"+str(dbInterfacePort)+"/powermonthflex?select=select * from Power_Data_Month where strftime('%m',Date) == '"+str(currentMonth-1).zfill(2)+"' order by date desc limit 1"
 	if currentMonth == 1:
-		select = "http://hap-nodejs:8090/powermonthflex?select=select * from Power_Data_Month where strftime('%m',Date) == '"+str(12)+"' order by date desc limit 1"
+		select = "http://"+dbInterfaceHost+":"+str(dbInterfacePort)+"/powermonthflex?select=select * from Power_Data_Month where strftime('%m',Date) == '"+str(12)+"' order by date desc limit 1"
 	data = requests.get(select).json()
 	total_month_before = total_value_before = 0.0
 	total_month = 0.0
@@ -107,10 +117,10 @@ def index():
 	# 	total_month = 0.0
 	# 	old_total = 0.0
 	# 	old_date = "2025-04-30"
-	# 	#select = "http://hap-nodejs:8090/powerhistory?select=select * from Power_Data_Month where strftime('%m', Date) == strftime('%m', Date('now','-1 month')) order by Date desc limit 1;"
-	# 	select = "http://hap-nodejs:8090/powerhistory?select=select * from Power_Data_Month where strftime('%m', Date) == '"+str(currentMonth-1).zfill(2)+"' order by Date desc limit 1;"
+	# 	#select = "http://"+dbInterfaceHost+":"+str(dbInterfacePort)+"/powerhistory?select=select * from Power_Data_Month where strftime('%m', Date) == strftime('%m', Date('now','-1 month')) order by Date desc limit 1;"
+	# 	select = "http://"+dbInterfaceHost+":"+str(dbInterfacePort)+"/powerhistory?select=select * from Power_Data_Month where strftime('%m', Date) == '"+str(currentMonth-1).zfill(2)+"' order by Date desc limit 1;"
 	# 	if currentMonth == 1:
-	# 		select = "http://hap-nodejs:8090/powerhistory?select=select * from Power_Data_Month where strftime('%m', Date) == '"+str(12)+"' order by Date desc limit 1;"
+	# 		select = "http://"+dbInterfaceHost+":"+str(dbInterfacePort)+"/powerhistory?select=select * from Power_Data_Month where strftime('%m', Date) == '"+str(12)+"' order by Date desc limit 1;"
 	# 	data = requests.get(select).json()
 	# 	if( len(data) ):
 	# 		logging.info( "last data in month before: " )
@@ -118,16 +128,16 @@ def index():
 	# 		old_total = float("{:06.1f}".format(data[0]['Total']))
 	# 		old_date = data[0]['Date_n_Time']
 	# 		total_month = float("{:06.1f}".format(total - data[0]['Total']))
-	# 	data = requests.get("http://hap-nodejs:8090/powerhistory?select=select * from Power_Data where datetime(Date_n_time) >= datetime('now','-1 months') and date(Date_n_Time) < date('now') ORDER BY Date_n_Time desc limit 1;").json()
+	# 	data = requests.get("http://"+dbInterfaceHost+":"+str(dbInterfacePort)+"/powerhistory?select=select * from Power_Data where datetime(Date_n_time) >= datetime('now','-1 months') and date(Date_n_Time) < date('now') ORDER BY Date_n_Time desc limit 1;").json()
 	# 	if( len(data) ):
 	# 		logging.info( "first data in month before: " )
 	# 		logging.info( data[0] )
 	# 		total_month_before = old_total - float("{:06.1f}".format(data[0]['Total']))
-	# 	data = request.get("http://hap-nodejs:8090/powerhistory?select=insert into Power_Data_Month(Date,Total,Used) values(strftime('%Y-%m-%d', '"+old_date+"'),"+old_total+","+total_month_before+");")
+	# 	data = request.get("http://"+dbInterfaceHost+":"+str(dbInterfacePort)+"/powerhistory?select=insert into Power_Data_Month(Date,Total,Used) values(strftime('%Y-%m-%d', '"+old_date+"'),"+old_total+","+total_month_before+");")
 	# 	if( len(data) ):
 	# 		logging.info( data[0] )
 
-	data = requests.get("http://hap-nodejs:8090/powerhistory?select=select * from Power_Data_Year where strftime('%Y', Date) == strftime('%Y', Date('now','-1 year'));").json()
+	data = requests.get("http://"+dbInterfaceHost+":"+str(dbInterfacePort)+"/powerhistory?select=select * from Power_Data_Year where strftime('%Y', Date) == strftime('%Y', Date('now','-1 year'));").json()
 	total_year_before = 0.0;
 	total_year = 0.0
 	if( len(data) ):
@@ -194,8 +204,8 @@ def PowerThisMonth():
 @app.route("/PowerHistory")
 @check_auth
 def PowerHistory():
-	#history = requests.get("http://hap-nodejs:8090/power1d?para=-24 hour").json()
-	history = requests.get("http://hap-nodejs:8090/powerflex?select=select * from Power_Data where datetime(Date_n_Time) > datetime('now', '-22 hours');").json()
+	#history = requests.get("http://"+dbInterfaceHost+":"+str(dbInterfacePort)+"/power1d?para=-24 hour").json()
+	history = requests.get("http://"+dbInterfaceHost+":"+str(dbInterfacePort)+"/powerflex?select=select * from Power_Data where datetime(Date_n_Time) > datetime('now', '-22 hours');").json()
 	numSamples = len(history)
 	logging.info( "entries in last 24 hours: %d", len(history) )
 	powers = []
@@ -249,7 +259,7 @@ def PowerHistory():
 @app.route("/CurrentCurrent")
 @check_auth
 def CurrentCurrent():
-	history = requests.get("http://hap-nodejs:8090/powerflex?select=select * from Power_Data order by Date_n_time desc limit 1;").json()
+	history = requests.get("http://"+dbInterfaceHost+":"+str(dbInterfacePort)+"/powerflex?select=select * from Power_Data order by Date_n_time desc limit 1;").json()
 	logging.info(history)
 	numSamples = len(history)
 	logging.info( "last entry: %d, %d", len(history), numSamples )
@@ -319,12 +329,12 @@ def PowerThisWeekImg():
 	dayOfWeek = currentDayOfWeek = datetime.weekday(datetime.now())
 	logging.info( "dayOfWeek: %d", dayOfWeek )
 	colors[dayOfWeek] = "tab:green"
-	today = requests.get("http://hap-nodejs:8090/powerflex?select=select * from Power_Data where Date(Date_n_time) == Date('now','localtime') ORDER BY Date_n_Time desc limit 1;").json()
+	today = requests.get("http://"+dbInterfaceHost+":"+str(dbInterfacePort)+"/powerflex?select=select * from Power_Data where Date(Date_n_time) == Date('now','localtime') ORDER BY Date_n_Time desc limit 1;").json()
 	logging.info( "today result:" )
 	logging.info( today )
 	currentTotal = today[0]['Total']
 	logging.info("currentTotal: %3.1f", currentTotal)
-	select = "http://hap-nodejs:8090/powerhistory?select=select * from Power_Data_Day where Date(Date) == Date('now','localtime','-1 days');"
+	select = "http://"+dbInterfaceHost+":"+str(dbInterfacePort)+"/powerhistory?select=select * from Power_Data_Day where Date(Date) == Date('now','localtime','-1 days');"
 	logging.info( select )
 	ending = requests.get( select ).json()
 	if( len(ending) >= 1 ):
@@ -337,7 +347,7 @@ def PowerThisWeekImg():
 			dayOfWeek = 6
 		logging.info( "dayOfWeek: %d", dayOfWeek )
 		logging.info( "day index: %d", i )
-		select = "http://hap-nodejs:8090/powerhistory?select=select * from Power_Data_Day where Date(Date) == Date('now','localtime','"+str((0-i-1))+" days');"
+		select = "http://"+dbInterfaceHost+":"+str(dbInterfacePort)+"/powerhistory?select=select * from Power_Data_Day where Date(Date) == Date('now','localtime','"+str((0-i-1))+" days');"
 		logging.info( select )
 		ending = requests.get( select ).json()
 		logging.info( "DB query result:" )
@@ -417,7 +427,7 @@ def PowerThisMonthImg():
 	colors[currentMonth-1] = "tab:green"
 	powers[currentMonth-1] = 0.0
 	currentTotal = 0.0
-	today = requests.get("http://hap-nodejs:8090/powerflex?select=select * from Power_Data where Date(Date_n_time) == Date('now','localtime') ORDER BY Date_n_Time desc limit 1;").json()
+	today = requests.get("http://"+dbInterfaceHost+":"+str(dbInterfacePort)+"/powerflex?select=select * from Power_Data where Date(Date_n_time) == Date('now','localtime') ORDER BY Date_n_Time desc limit 1;").json()
 	if( len(today) ):
 		#logging.info( today )
 		currentTotal = today[0]['Total']
@@ -429,8 +439,8 @@ def PowerThisMonthImg():
 	else:
 		tempCurrentMonth = currentMonth - 1
 	logging.info("currentMonth: %d %s", tempCurrentMonth, str(tempCurrentMonth).zfill(2))
-	#select = "http://hap-nodejs:8090/powermonthflex?select=select * from Power_Data_Month where strftime('%m',Date) == strftime('%m',datetime('now','-1 Month') order by date desc limit 1"
-	select = "http://hap-nodejs:8090/powermonthflex?select=select * from Power_Data_Month where strftime('%m',Date) == '"+str(tempCurrentMonth).zfill(2)+"' order by date desc limit 1"
+	#select = "http://"+dbInterfaceHost+":"+str(dbInterfacePort)+"/powermonthflex?select=select * from Power_Data_Month where strftime('%m',Date) == strftime('%m',datetime('now','-1 Month') order by date desc limit 1"
+	select = "http://"+dbInterfaceHost+":"+str(dbInterfacePort)+"/powermonthflex?select=select * from Power_Data_Month where strftime('%m',Date) == '"+str(tempCurrentMonth).zfill(2)+"' order by date desc limit 1"
 	logging.info("requestStr: %s", select)
 	data = requests.get(select).json() 
 	if( len(data) ):
@@ -451,8 +461,8 @@ def PowerThisMonthImg():
 			else:
 				diff = diff + 1 
 				colors[i-1] = "tab:cyan"
-			#select = "http://hap-nodejs:8090/powermonthflex?select=select * from Power_Data_Month where strftime('%m',Date) == strftime('%m',Date('now','"+str(diff)+" Month')) order by date desc limit 1;"
-			select = "http://hap-nodejs:8090/powermonthflex?select=select * from Power_Data_Month where strftime('%m',Date) == '"+str(currentMonth+diff).zfill(2)+"' order by date desc limit 1;"
+			#select = "http://"+dbInterfaceHost+":"+str(dbInterfacePort)+"/powermonthflex?select=select * from Power_Data_Month where strftime('%m',Date) == strftime('%m',Date('now','"+str(diff)+" Month')) order by date desc limit 1;"
+			select = "http://"+dbInterfaceHost+":"+str(dbInterfacePort)+"/powermonthflex?select=select * from Power_Data_Month where strftime('%m',Date) == '"+str(currentMonth+diff).zfill(2)+"' order by date desc limit 1;"
 			logging.info(select)
 			used = requests.get(select).json()
 			if( len(used) >= 1):
@@ -516,7 +526,10 @@ if __name__ == "__main__":
 	myPath = os.path.dirname(os.path.realpath(__file__))
 	read_config_data( myPath+'/PowerStation.ini' )
 
-	app.run(host='0.0.0.0', port=8082, debug=True, ssl_context=(myPath+'/server.crt',myPath+'/server.key'))
+	if( crt != "" and key != "" ):
+		app.run(host='0.0.0.0', port=ownPort, debug=True, ssl_context=(crt,key))
+	else:
+		app.run(host='0.0.0.0', port=ownPort, debug=True)
 
 
 
