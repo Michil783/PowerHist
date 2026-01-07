@@ -526,8 +526,8 @@ if __name__ == "__main__":
 	myPath = os.path.dirname(os.path.realpath(__file__))
 	read_config_data( myPath+'/PowerStation.ini' )
 
-	if( crt != "" and key != "" ):
-		app.run(host='0.0.0.0', port=ownPort, debug=True, ssl_context=(crt,key))
+	if( cert != "" and key != "" ):
+		app.run(host='0.0.0.0', port=ownPort, debug=True, ssl_context=(cert,key))
 	else:
 		app.run(host='0.0.0.0', port=ownPort, debug=True)
 
