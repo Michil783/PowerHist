@@ -54,6 +54,8 @@ def read_config_data( filename ):
 	dbInterfaceHost = str(config['DBInterface']['host'])
 	dbInterfacePort = int(config['DBInterface']['port'])
 	ownPort = int(config['host']['port'])
+	cert = str(config["certificates"]["cert"])
+	key = str(config["certificates"]["key"])
 
 # define and initialize global variables
 time_of_update = 0
@@ -527,8 +529,12 @@ if __name__ == "__main__":
 	read_config_data( myPath+'/PowerStation.ini' )
 
 	if( cert != "" and key != "" ):
+		logging.info("starting webserver with https")
+		logging.info("cert: %s", cert)
+		logging.info("key:  %s", key)
 		app.run(host='0.0.0.0', port=ownPort, debug=True, ssl_context=(cert,key))
 	else:
+		logging.info("starting webserver with http")
 		app.run(host='0.0.0.0', port=ownPort, debug=True)
 
 
