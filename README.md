@@ -36,4 +36,6 @@ In addition there are 3 parts which are in this project.
   More details could be found here: [PowerStation](PowerStation/README.md)
   This module has to run, if you want to use the web pages to view the data in the database. If so, please run it using PM2
 
-Currently I'm also working on an iOS application to display the data directly on an Apple device. This app is also using the interface to the Database provided by PowerHist.py and the MQTT broker. As soon as it is available in Apple AppStore I note it here.
+Due to issues with self signed certificates it is not recommended to make the system available from internet. Probably some could help here to make all connections secure (which seems at least with the Tasmota device, complicated).
+
+I'm also working on an iOS application to display the data directly on an Apple device. This app is also using the interface to the Database provided by PowerHist.py and the MQTT broker. As soon as it is available in Apple AppStore I note it here.
