@@ -47,10 +47,10 @@ The web page PowerStation.py is fetching values from this table to display the c
 insert into power_data_year (date,total,used) values("YYYY-MM-DD",TTTT.T,UUUU.U);
 ```
 
-YYYY = year
-MM = month (normaly 12)
-DD = day (normaly 31)
-TTTT.T last years total value of the power meter
-UUUU.U last years power consumption
+YYYY = year\
+MM = month (normaly 12)\
+DD = day (normaly 31)\
+TTTT.T last years total value of the power meter\
+UUUU.U last years power consumption\
 
 MQTT-to-DB.py module is inserting a new entry into this table when year number is changing
