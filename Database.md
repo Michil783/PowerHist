@@ -2,7 +2,8 @@
 
 The database has four tables
 
-```CREATE TABLE Power_Data (
+```
+CREATE TABLE Power_Data (
 Date_n_Time text primary key,
 Total float,
 Power integer,
