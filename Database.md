@@ -39,7 +39,7 @@ Currently no automatic cleaning of this table is done. It will be part of future
 
 Table Power_Data_Month is used for the monthly values and is also filled up from MQTT-to-DB.py after a new month starts. No autocleaning is done here (future enhancements).
 
-Table Power_Data_Year is currently not used. It is planned to store values from past years. (future enhancements)
+Table Power_Data_Year stores values from past years.
 The web page PowerStation.py is fetching values from this table to display the current years used power and the useage from year before. You have to insert the value from last year manually by using the following SQLite3 SQL statement:
 
 ```
@@ -51,3 +51,5 @@ MM = month (normaly 12)
 DD = day (normaly 31)
 TTTT.T last years total value of the power meter
 UUUU.U last years power consumption
+
+MQTT-to-DB.py module is inserting a new entry into this table when year number is changing

@@ -21,6 +21,7 @@ import os
 DB_Name =  ""
 newDay = False
 updateTodayData = False
+lastYear = 0
 lastMonth = 0
 lastDay = 0
 
@@ -37,7 +38,9 @@ path = os.path.dirname(os.path.realpath(__file__))
 logging.config.fileConfig(path+"/MQTT-to-DB.conf")
 
 def init():
+	global lastMonth, lastYear
 	lastMonth = 0
+	lastYear = 0
 	logging.info( "init()" )
 	try:
 		conn = sqlite3.connect(DB_Name)
@@ -57,11 +60,28 @@ def init():
 				logging.info("3. %s", datetime.datetime.strptime(row[0], "%Y-%m-%d").date().month)
 				lastMonth = datetime.datetime.strptime(row[0], "%Y-%m-%d").date().month
 				logging.info("during init last month: %d", lastMonth)
+
+		select = "select * from Power_Data_Year order by Date desc limit 1;"
+		last_entry = curs.execute( select )
+		rows = curs.fetchall()
+		logging.info( last_entry )
+		logging.info( rows )
+		logging.info( len(rows) )
+		if( len(rows) ):
+			for row in rows:
+				logging.info("last year")
+				logging.info( row )
+				logging.info("1. %s", datetime.datetime.strptime(row[0], "%Y-%m-%d"))
+				logging.info("2. %s", datetime.datetime.strptime(row[0], "%Y-%m-%d").date())
+				logging.info("3. %s", datetime.datetime.strptime(row[0], "%Y-%m-%d").date().year)
+				lastYear = datetime.datetime.strptime(row[0], "%Y-%m-%d").date().year
+				logging.info("during init last year: %d", lastYear)
 	except:
-		logging.info("error during getting last entry from month before")
+		logging.info("error during getting last entry from month or year before")
 		logging.info( "Unexpected error:", sys.exc_info()[0] )
 	conn.close()
-	return lastMonth
+
+	return
 
 def getFirstPowerDateFromDayBefore():
 	firstEntryTotal = 0.0
@@ -143,6 +163,32 @@ def getLastMonthTotal():
 	conn.close()
 	return lastMonthTotal
 
+def getLastYearTotal():
+	lastYearTotal = 0.0
+	logging.info("getLastYearTotal()")
+	try:
+		conn=sqlite3.connect(DB_Name)
+		logging.info( "connection" )
+		curs = conn.cursor()
+		logging.info( "cursor" )
+		select = "select * from Power_Data_Year order by Date desc limit 1;"
+		logging.info("select: %s", select)
+		last_entry = curs.execute( select )
+		rows = curs.fetchall()
+		logging.info( last_entry )
+		logging.info( rows )
+		logging.info( len(rows) )
+		if( len(rows) ):
+			for row in rows:
+				logging.info("last year")
+				logging.info( row )
+				lastYearTotal = float(row[1])
+	except:
+		logging.info("error during getting last entry from day before")
+		logging.info( "Unexpected error:", sys.exc_info()[0] )
+	conn.close()
+	return lastYearTotal
+
 def insertNewDayData(newDayDate, newDayTotal, newDayUsed):
 	logging.info("insertNewDayData(%s,%6.0f,%3.0f)", newDayDate, newDayTotal, newDayUsed)
 	try:
@@ -174,6 +220,23 @@ def insertNewMonthData(newMonthDate, newMonthTotal, newMonthUsed):
 		conn.commit()
 	except:
 		logging.info("error during insering new day data")
+		logging.info( "Unexpected error:", sys.exc_info()[0] )
+	conn.close()
+
+def insertNewYearData(newYearDate, newYearTotal, newYearUsed):
+	logging.info("insertNewYearData(%s,%6.0f,%3.0f)", newYearDate, newYearTotal, newYearUsed)
+	try:
+		conn=sqlite3.connect(DB_Name)
+		logging.info( "connection" )
+		curs = conn.cursor()
+		logging.info( "cursor" )
+		select = "insert into Power_Data_Year (Date, Total, Used) values (\""+newYearDate+"\","+str(newYearTotal)+","+str(newYearUsed)+");"
+		logging.info( select )
+		curs.execute( select )
+		logging.info("new year entry in Power_Data_Year")
+		conn.commit()
+	except:
+		logging.info("error during insering new year data")
 		logging.info( "Unexpected error:", sys.exc_info()[0] )
 	conn.close()
 
@@ -222,7 +285,7 @@ def deleteDataFrom2DaysBefore():
 
 # Function to save Temperature to DB Table
 def Power_Data_Handler(topic, jsonData):
-	global newDay, lastDay, lastMonth
+	global newDay, lastDay, lastMonth, lastYear
 	logging.info( "Power_data_Handler()" )
 	logging.info("newDay: %d", newDay)
 	json_Dict_root = {}
@@ -284,26 +347,15 @@ def Power_Data_Handler(topic, jsonData):
 		newDayEntry_Used =  float("{:06.1f}".format(lastEntryTotal - firstEntryTotal))
 		insertNewDayData(newDayEntry_date, newDayEntry_Total, newDayEntry_Used)
 		deleteDataFrom2DaysBefore()
-
-		# logging.info( "start inserting actual day into day data" )
-		# newDayEntry_date = datetime_obj.date()
-		# newDayEntry_Total = Total
-		# newDayEntry_Used = Total - newDayEntry_Total
-		# logging.info("newDayEntry_date: %s", newDayEntry_date)
-		# logging.info("newDayEntry_Total: %6.1f", newDayEntry_Total)
-		# logging.info("newDayEntry_Used: %3.1f", newDayEntry_Used)
-		# insertNewDayData(newDayEntry_date, newDayEntry_Total, newDayEntry_Used)
-		# updateTodayData = True
-	#elif( time.hour >= 4 and newDay ):
 	elif( time.hour >= 4 and day != lastDay ):
 		#logging.info( "set newDay to False" )
 		#newDay = False
 		logging.info( "set lastDay (%d) to day (%d)", lastDay, day )
 		lastDay = day
 	
+	year = datetime_obj.date().year
 	month = datetime_obj.date().month
 	day = datetime_obj.date().day
-	#logging.info("day: %d, lastMonth: %d, month: %d, newDay: %d", day, lastMonth, month, newDay)
 	logging.info("day: %d, lastMonth: %d, month: %d", day, lastMonth, month)
 	if( (day == 1) and (month != lastMonth) ):
 		logging.info( "Start inserting into month data" )
@@ -322,6 +374,19 @@ def Power_Data_Handler(topic, jsonData):
 	elif month != lastMonth:
 		logging.info("day: %d set lastMonth: %d to actual month: %d", day, lastMonth, month)
 		lastMonth = month
+
+	logging.info("lastYear: %d, year: %d", lastYear, year)
+	if( year != lastYear ):
+		logging.info( "Start inserting into year data" )
+		lastMonthTotal = getLastMonthTotal()
+		logging.info("lastMonthTotal: %f", lastMonthTotal)
+		lastYearTotal = getLastYearTotal()
+		logging.info("lastYearTotal: %f", lastYearTotal)
+		newYearEntry_date = str(year-1)+"-12-31"
+		newYearEntry_Total = lastMonthTotal
+		newYearEntry_Used =  float("{:06.1f}".format(lastMonthTotal - lastYearTotal))
+		insertNewYearData(newYearEntry_date, newYearEntry_Total, newYearEntry_Used)
+		lastYear = year
 
 #Subscribe to all Sensors at Base Topic
 def on_connect(mosq, obj, flags, rc):
@@ -357,7 +422,9 @@ def read_config( filename ):
 
 read_config("MQTT.conf")
 
-lastMonth = init()
+init()
+logging.info("lastMonth: %d", lastMonth)
+logging.info("lastYear: %d", lastYear)
 
 logging.info( "start creating mqtt client" )
 logging.info("user: "+MQTT_User)
