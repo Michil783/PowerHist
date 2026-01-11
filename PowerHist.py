@@ -21,8 +21,8 @@ import sys
 import argparse
 
 DB_Name = "/home/pi/PowerHist/Power.db"
-#cert = "server.crt"
-#key = "server.key"
+cert = ""
+key = ""
 port = 8090
 configFile = "PowerHist.conf"
 
@@ -32,8 +32,8 @@ def read_config( filename ):
     config.read(filename)
     DB_Name = str(config['Database']['db'])
     port = int(config['host']['port'])
-    #cert = str(config['certificates']['crt'])
-    #key = str(config['certificates']['key'])
+    cert = str(config['certificates']['crt'])
+    key = str(config['certificates']['key'])
 
 def getHistDataSingle (sql_query):
     conn=sqlite3.connect(DB_Name)
@@ -92,7 +92,8 @@ def powerQuery():
     )
     return response
 
-""" @app.route("/power1d", methods=['GET'])
+"""
+@app.route("/power1d", methods=['GET'])
 def powerQuery1d():
     parameter = request.args.get('para')
     data = []
@@ -131,7 +132,7 @@ def powerQuery1d():
         mimetype='application/json'
     )
     return response
- """
+"""
 @app.route("/powerflex", methods=['GET'])
 def powerQueryflex():
     select = request.args.get('select')
@@ -239,4 +240,12 @@ if __name__ == "__main__":
     print("configFile: " + configFile)
     read_config( myPath+"/"+configFile )
     print("db", DB_Name)
-    app.run(host='0.0.0.0', port=port, debug=True, extra_files=[])
+    if( cert != "" and key != "" ):
+        print("starting webserver with https")
+        print("cert: " + cert)
+        print("key:  " + key)
+        app.run(host='0.0.0.0', port=port, debug=True, ssl_context=(cert,key))
+    else:
+        print("starting webserver with http")
+        app.run(host='0.0.0.0', port=port, debug=True)
+    #app.run(host='0.0.0.0', port=port, debug=True, extra_files=[])
