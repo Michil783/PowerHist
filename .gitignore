@@ -1,2 +1,4 @@
 .DS_Store
 .gitignore
+MQTT-to-DB.log
+Power.db

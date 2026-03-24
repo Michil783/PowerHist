@@ -4,7 +4,6 @@
 #--- Version: 1.0
 #------------------------------------------
 
-
 import paho.mqtt.client as mqtt
 import json
 import sqlite3
@@ -76,11 +75,10 @@ def init():
 				logging.info("3. %s", datetime.datetime.strptime(row[0], "%Y-%m-%d").date().year)
 				lastYear = datetime.datetime.strptime(row[0], "%Y-%m-%d").date().year
 				logging.info("during init last year: %d", lastYear)
+		conn.close()
 	except:
 		logging.info("error during getting last entry from month or year before")
 		logging.info( "Unexpected error:", sys.exc_info()[0] )
-	conn.close()
-
 	return
 
 def getFirstPowerDateFromDayBefore():
@@ -103,10 +101,10 @@ def getFirstPowerDateFromDayBefore():
 				logging.info("first entry of yesterday")
 				logging.info( row )
 				firstEntryTotal = float(row[1])
+		conn.close()
 	except:
 		logging.info("error during getting first entry from day before")
 		logging.info( "Unexpected error:", sys.exc_info()[0] )
-	conn.close()
 	return firstEntryTotal
 
 def getLastPowerDataFromDayBefore():
@@ -131,10 +129,10 @@ def getLastPowerDataFromDayBefore():
 				logging.info( row )
 				lastEntryDate = datetime.datetime.strptime(row[0], "%Y-%m-%dT%H:%M:%S").date().strftime("%Y-%m-%d")
 				lastEntryTotal = float(row[1])
+		conn.close()
 	except:
 		logging.info("error during getting last entry from day before")
 		logging.info( "Unexpected error:", sys.exc_info()[0] )
-	conn.close()
 	return lastEntryDate, lastEntryTotal
 
 def getLastMonthTotal():
@@ -157,10 +155,10 @@ def getLastMonthTotal():
 				logging.info("last month")
 				logging.info( row )
 				lastMonthTotal = float(row[1])
+		conn.close()
 	except:
 		logging.info("error during getting last entry from day before")
 		logging.info( "Unexpected error:", sys.exc_info()[0] )
-	conn.close()
 	return lastMonthTotal
 
 def getLastYearTotal():
@@ -183,10 +181,10 @@ def getLastYearTotal():
 				logging.info("last year")
 				logging.info( row )
 				lastYearTotal = float(row[1])
+		conn.close()
 	except:
 		logging.info("error during getting last entry from day before")
 		logging.info( "Unexpected error:", sys.exc_info()[0] )
-	conn.close()
 	return lastYearTotal
 
 def insertNewDayData(newDayDate, newDayTotal, newDayUsed):
@@ -201,10 +199,10 @@ def insertNewDayData(newDayDate, newDayTotal, newDayUsed):
 		curs.execute( select )
 		logging.info("new day entry in Power_Data_Day")
 		conn.commit()
+		conn.close()
 	except:
 		logging.info("error during insering new day data")
 		logging.info( "Unexpected error:", sys.exc_info()[0] )
-	conn.close()
 
 def insertNewMonthData(newMonthDate, newMonthTotal, newMonthUsed):
 	logging.info("insertNewMonthData(%s,%6.0f,%3.0f)", newMonthDate, newMonthTotal, newMonthUsed)
@@ -218,10 +216,10 @@ def insertNewMonthData(newMonthDate, newMonthTotal, newMonthUsed):
 		curs.execute( select )
 		logging.info("new month entry in Power_Data_Month")
 		conn.commit()
+		conn.close()
 	except:
 		logging.info("error during insering new day data")
 		logging.info( "Unexpected error:", sys.exc_info()[0] )
-	conn.close()
 
 def insertNewYearData(newYearDate, newYearTotal, newYearUsed):
 	logging.info("insertNewYearData(%s,%6.0f,%3.0f)", newYearDate, newYearTotal, newYearUsed)
@@ -235,10 +233,10 @@ def insertNewYearData(newYearDate, newYearTotal, newYearUsed):
 		curs.execute( select )
 		logging.info("new year entry in Power_Data_Year")
 		conn.commit()
+		conn.close()
 	except:
 		logging.info("error during insering new year data")
 		logging.info( "Unexpected error:", sys.exc_info()[0] )
-	conn.close()
 
 def insertNewData(Date_n_Time, Total, Power, Voltage, Voltage_L2, Voltage_L3, Current, Current_L2, Current_L3, Freq):
 	logging.info("insertNewData(%s, %f, %d, %d, %d, %d, %f, %f, %f, %f)", Date_n_Time, Total, Power, Voltage, Voltage_L2, Voltage_L3, Current, Current_L2, Current_L3, Freq)
@@ -258,10 +256,10 @@ def insertNewData(Date_n_Time, Total, Power, Voltage, Voltage_L2, Voltage_L3, Cu
 		logging.info( "commit" )
 		logging.info( "inserted" )
 		logging.info( "Inserted Power Data into Database." )
+		conn.close()
 	except:
 		logging.info("error during inserting new data")
 		logging.info( "Unexpected error:", sys.exc_info()[0] )
-	conn.close()
 
 def deleteDataFrom2DaysBefore():
 	logging.info("deleteDataFrom2DaysBefore()")
@@ -277,6 +275,7 @@ def deleteDataFrom2DaysBefore():
 		logging.info("commit for delete")
 		conn.execute( "vacuum;" )
 		logging.info("vacuum executed")
+		conn.close()
 	except:
 		logging.info("error during deleteing 2 day old data")
 		logging.info( "Unexpected error:", sys.exc_info()[0] )
@@ -288,17 +287,26 @@ def Power_Data_Handler(topic, jsonData):
 	global newDay, lastDay, lastMonth, lastYear
 	logging.info( "Power_data_Handler()" )
 	logging.info("newDay: %d", newDay)
-	json_Dict_root = {}
+	json_Dict_root = json_Dict = {}
+	Date_n_Time = Total = Power = Voltage = Voltage_L2 = Voltage_L3 = Current = Current_L2 = Current_L3 = Freq = ""
+	date_format = '%Y-%m-%dT%H:%M:%S'
 	try:
 		#Parse Data
-		if( topic == TASMOTA_TOPIC or topic == TASMOTA_TOPIC_NEW ):
+		if( topic == TASMOTA_TOPIC ):
 			json_Dict_root = json.loads(jsonData)
 		else:
 			json_Dict = json.loads(jsonData)
 			json_Dict_root = json_Dict["sn"]
 		logging.info( json_Dict_root )
-		Date_n_Time = json_Dict_root['Time']
+		logging.info( datetime.datetime.strptime(json_Dict_root['Time'], date_format) )
+		if( (json_Dict_root['Time'])[:10] == '1970-01-01' ):
+			logging.info("received invalid date and time useing system time instead")
+			Date_n_Time = datetime.datetime.now().strftime('%Y-%m-%dT%H:%M:%S')
+		else:
+			Date_n_Time = json_Dict_root['Time']
 		logging.info( "Date_n_Time: %s", Date_n_Time )
+		date_obj = datetime.datetime.strptime(json_Dict_root['Time'], date_format).date()
+		logging.info( date_obj )
 		json_Dict = json_Dict_root['ENERGY']
 		logging.info( json_Dict )
 		Total = float(json_Dict['Total'])
@@ -376,7 +384,7 @@ def Power_Data_Handler(topic, jsonData):
 		lastMonth = month
 
 	logging.info("lastYear: %d, year: %d", lastYear, year)
-	if( year != lastYear ):
+	if( year != lastYear & month == 1 & day == 1):
 		logging.info( "Start inserting into year data" )
 		lastMonthTotal = getLastMonthTotal()
 		logging.info("lastMonthTotal: %f", lastMonthTotal)
@@ -402,7 +410,7 @@ def on_message(mosq, obj, msg):
 	logging.info( "MQTT Data Received..." )
 	logging.info( "MQTT Topic: " + msg.topic )
 	#print( "Data: " + msg.payload )
-	if( msg.topic == TASMOTA_TOPIC or msg.topic == TASMOTA_TOPIC_ALT or msg.topic == TASMOTA_TOPIC_NEW ):
+	if( msg.topic == TASMOTA_TOPIC ):
 		Power_Data_Handler(msg.topic, msg.payload)
 
 def on_subscribe(mqttc, obj, mid, reason_code_list):
