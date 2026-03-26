@@ -40,5 +40,5 @@ Due to issues with self signed certificates it is not recommended to make the sy
 
 I'm also working on an iOS, iPadOS and macOS application to display the data directly on an Apple device. This app is also using the interface to the Database provided by PowerHist.py and the MQTT broker. As soon as it is available in Apple AppStore I note it here.
 
-If you have any issues with the backend system or the iOS, iPadOA or macOS application please send your request via the issues page here in Github https://github.com/Michil783/PowerHist/issues
+If you have any issues with the backend system or the iOS, iPadOS or macOS application please send your request via the issues page here in Github https://github.com/Michil783/PowerHist/issues
 
