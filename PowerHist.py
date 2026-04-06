@@ -32,8 +32,9 @@ def read_config( filename ):
     config.read(filename)
     DB_Name = str(config['Database']['db'])
     port = int(config['host']['port'])
-    cert = str(config['certificates']['crt'])
-    key = str(config['certificates']['key'])
+    if config.get('certificates', '') :
+        cert = str(config.get('certificates')['crt'])
+        key = str(config['certificates']['key'])
 
 def getHistDataSingle (sql_query):
     conn=sqlite3.connect(DB_Name)

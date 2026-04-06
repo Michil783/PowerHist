@@ -38,7 +38,7 @@ In addition there are 3 parts which are in this project.
 
 Due to issues with self signed certificates it is not recommended to make the system available from internet. Probably some could help here to make all connections secure (which seems at least with the Tasmota device, complicated).
 
-I'm also working on an iOS, iPadOS and macOS application to display the data directly on an Apple device. This app is also using the interface to the Database provided by PowerHist.py and the MQTT broker. As soon as it is available in Apple AppStore I note it here.
+I'm also working on an iOS, iPadOS and macOS application to display the data directly on an Apple device. This app is also using the interface to the Database provided by PowerHist.py and the MQTT broker. The iOS and iPadOS App is available in App Store: https://apps.apple.com/de/app/stromzaehler/id6756966434 and it is for free. The App runs also on macOS (as iPad App).
 
 If you have any issues with the backend system or the iOS, iPadOS or macOS application please send your request via the issues page here in Github https://github.com/Michil783/PowerHist/issues
 
